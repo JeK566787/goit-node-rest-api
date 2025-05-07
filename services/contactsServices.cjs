@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 
 
 const contactsPath = path.join(__dirname, "../db/contacts.json");
-console.log(contactsPath);
+
 
 const getAll = async () => {
     const data = await fs.readFile(contactsPath, "utf-8");
@@ -39,6 +39,23 @@ const updateById = async (id, data) => {
     return contacts[index];
 }
 
+const updateByPatch = async (id, data) => {
+    const contacts = await getAll();
+    const index = contacts.findIndex(item => item.id === id);
+    if (index === -1) {
+        return null;
+    }
+
+    // Объединяем старые данные с новыми (частичное обновление)
+    contacts[index] = {
+        ...contacts[index],
+        ...data,
+    };
+
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+    return contacts[index];
+};
+
 const deleteById = async (id) => {
     const contacts = await getAll();
     const index = contacts.findIndex(item => item.id === id);
@@ -55,5 +72,6 @@ module.exports = {
     getById,
     add,
     updateById,
+    updateByPatch,
     deleteById,
 };
